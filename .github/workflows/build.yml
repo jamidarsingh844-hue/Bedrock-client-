@@ -6,7 +6,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Unzip project
-        run: unzip -q BedrockLauncher.zip -d src
+        run: |
+          unzip -q BedrockLauncher.zip -d src
+          find src -exec touch {} +
       - name: Native submodules
         working-directory: src
         run: |
