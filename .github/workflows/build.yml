@@ -9,6 +9,11 @@ jobs:
         run: |
           unzip -q BedrockLauncher.zip -d src
           find src -exec touch {} +
+      - name: Patch AboutActivity
+        working-directory: src
+        run: |
+          sed -i 's/TextView authorBadge = findViewById(R.id.author_badge);/TextView authorBadge = null;/' app/src/main/java/org/levimc/launcher/ui/activities/AboutActivity.java
+          grep -n "authorBadge = " app/src/main/java/org/levimc/launcher/ui/activities/AboutActivity.java
       - name: Native submodules
         working-directory: src
         run: |
