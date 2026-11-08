@@ -23,8 +23,9 @@ jobs:
           distribution: temurin
       - name: Android SDK packages
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "build-tools;35.0.0" "platforms;android-36"
+          SDKM=$(ls $ANDROID_HOME/cmdline-tools/*/bin/sdkmanager | head -1)
+          yes | $SDKM --licenses > /dev/null || true
+          $SDKM "build-tools;35.0.0" "platforms;android-36"
       - uses: nttld/setup-ndk@v1
         with:
           ndk-version: r28c
