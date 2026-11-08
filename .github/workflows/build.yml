@@ -1,0 +1,42 @@
+name: Build APK
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unzip project
+        run: unzip -q BedrockLauncher.zip -d src
+      - name: Native submodules
+        working-directory: src
+        run: |
+          rm -rf app/src/main/cpp/preloader app/src/main/cpp/libHttpClient
+          git clone --depth 1 https://github.com/LiteLDev/preloader-android app/src/main/cpp/preloader
+          git clone --depth 1 --recurse-submodules https://github.com/microsoft/libHttpClient app/src/main/cpp/libHttpClient
+      - name: Placeholder google-services.json
+        working-directory: src
+        run: |
+          echo '{"project_info":{"project_number":"000000000000","project_id":"placeholder","storage_bucket":"placeholder.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:000000000000:android:0000000000000000000000","android_client_info":{"package_name":"org.levimc.launcher"}},"oauth_client":[],"api_key":[{"current_key":"AIzaSyCIOnlyPlaceholderKey"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}],"configuration_version":"1"}' > app/google-services.json
+      - uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: temurin
+      - uses: android-actions/setup-android@v3
+      - run: yes | sdkmanager --licenses >/dev/null; sdkmanager "build-tools;35.0.0"
+      - uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r28c
+          link-to-sdk: true
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: "2.9.9"
+      - name: Build
+        working-directory: src
+        run: |
+          chmod +x gradlew
+          echo "curseforge.api_key=" >> local.properties
+          ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: src/app/build/outputs/apk/debug/*.apk
