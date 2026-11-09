@@ -9,11 +9,6 @@ jobs:
         run: |
           unzip -q BedrockLauncher.zip -d src
           find src -exec touch {} +
-      - name: Patch AboutActivity
-        working-directory: src
-        run: |
-          sed -i 's/TextView authorBadge = findViewById(R.id.author_badge);/TextView authorBadge = null;/' app/src/main/java/org/levimc/launcher/ui/activities/AboutActivity.java
-          grep -n "authorBadge = " app/src/main/java/org/levimc/launcher/ui/activities/AboutActivity.java
       - name: Native submodules
         working-directory: src
         run: |
@@ -23,7 +18,8 @@ jobs:
       - name: Placeholder google-services.json
         working-directory: src
         run: |
-          echo '{"project_info":{"project_number":"000000000000","project_id":"placeholder","storage_bucket":"placeholder.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:000000000000:android:0000000000000000000000","android_client_info":{"package_name":"org.levimc.launcher"}},"oauth_client":[],"api_key":[{"current_key":"AIzaSyCIOnlyPlaceholderKey"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}],"configuration_version":"1"}' > app/google-services.json
+          PKG=$(grep -oP 'applicationId "\K[^"]+' app/build.gradle)
+          printf '{"project_info":{"project_number":"000000000000","project_id":"placeholder","storage_bucket":"placeholder.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:000000000000:android:0000000000000000000000","android_client_info":{"package_name":"%s"}},"oauth_client":[],"api_key":[{"current_key":"AIzaSyCIOnlyPlaceholderKey"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}],"configuration_version":"1"}' "$PKG" > app/google-services.json
       - uses: actions/setup-java@v4
         with:
           java-version: "21"
